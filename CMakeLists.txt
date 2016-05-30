@@ -29,4 +29,6 @@ set(SOURCE_FILES
 
 add_executable(ImmortalsCom ${SOURCE_FILES})
 
+set_files_group(SOURCE_FILES)
+
 target_link_libraries(ImmortalsCom ${PROTOBUF_LIBRARIES})
