@@ -4,7 +4,7 @@
 int main()
 {
 	FLOAT_32 af;
-	af.f32 = 20001.52255f;
+	af.f32 = 21.52255f;
 
 	uint16_t ah = half_from_float(af.u32);
 
