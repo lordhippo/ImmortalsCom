@@ -1,8 +1,10 @@
 #ifndef READER_H
 #define READER_H
 
-#include "data_lite.h"
 #include <stdint.h>
+#include <stddef.h>
+
+#include "data_lite.h"
 
 void read_bytes(const uint8_t* const buffer, size_t* const pos, void* const data, const size_t count);
 

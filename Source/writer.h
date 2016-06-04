@@ -1,9 +1,10 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-#include "data_lite.h"
 #include <stdint.h>
-#include "half.h"
+#include <stddef.h>
+
+#include "data_lite.h"
 
 void write_bytes(uint8_t* const buffer, size_t* const pos, const void* const data, const size_t count);
 
