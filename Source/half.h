@@ -1,6 +1,5 @@
 #ifndef HALF_H
 #define HALF_H
-
 #include <stdint.h>
 
 union FLOAT_32

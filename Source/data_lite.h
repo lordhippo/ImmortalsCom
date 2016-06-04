@@ -1,106 +1,181 @@
-#pragma once
+#ifndef DATA_LITE_H
+#define DATA_LITE_H
 
 #include "half.h"
 
 struct Vector2f
 {
-	FLOAT_32 x;
-	FLOAT_32 y;
+	union  FLOAT_32 x;
+	union  FLOAT_32 y;
 };
 
 struct Vector3f
 {
-	FLOAT_32 x;
-	FLOAT_32 y;
-	FLOAT_32 z;
+	union  FLOAT_32 x;
+	union  FLOAT_32 y;
+	union  FLOAT_32 z;
 };
 
 struct Vector4f
 {
-	FLOAT_32 x;
-	FLOAT_32 y;
-	FLOAT_32 z;
-	FLOAT_32 w;
+	union  FLOAT_32 x;
+	union  FLOAT_32 y;
+	union  FLOAT_32 z;
+	union  FLOAT_32 w;
+};
+
+struct bits8_t
+{
+	uint8_t bit0 : 1;
+	uint8_t bit1 : 1;
+	uint8_t bit2 : 1;
+	uint8_t bit3 : 1;
+	uint8_t bit4 : 1;
+	uint8_t bit5 : 1;
+	uint8_t bit6 : 1;
+	uint8_t bit7 : 1;
+};
+
+struct bits16_t
+{
+	uint8_t bit0 : 1;
+	uint8_t bit1 : 1;
+	uint8_t bit2 : 1;
+	uint8_t bit3 : 1;
+	uint8_t bit4 : 1;
+	uint8_t bit5 : 1;
+	uint8_t bit6 : 1;
+	uint8_t bit7 : 1;
+	uint8_t bit8 : 1;
+	uint8_t bit9 : 1;
+	uint8_t bit10 : 1;
+	uint8_t bit11 : 1;
+	uint8_t bit12 : 1;
+	uint8_t bit13 : 1;
+	uint8_t bit14 : 1;
+	uint8_t bit15 : 1;
+};
+
+struct bits32_t
+{
+	uint8_t bit0  : 1;
+	uint8_t bit1  : 1;
+	uint8_t bit2  : 1;
+	uint8_t bit3  : 1;
+	uint8_t bit4  : 1;
+	uint8_t bit5  : 1;
+	uint8_t bit6  : 1;
+	uint8_t bit7  : 1;
+	uint8_t bit8  : 1;
+	uint8_t bit9  : 1;
+	uint8_t bit10 : 1;
+	uint8_t bit11 : 1;
+	uint8_t bit12 : 1;
+	uint8_t bit13 : 1;
+	uint8_t bit14 : 1;
+	uint8_t bit15 : 1;
+	uint8_t bit16 : 1;
+	uint8_t bit17 : 1;
+	uint8_t bit18 : 1;
+	uint8_t bit19 : 1;
+	uint8_t bit20 : 1;
+	uint8_t bit21 : 1;
+	uint8_t bit22 : 1;
+	uint8_t bit23 : 1;
+	uint8_t bit24 : 1;
+	uint8_t bit25 : 1;
+	uint8_t bit26 : 1;
+	uint8_t bit27 : 1;
+	uint8_t bit28 : 1;
+	uint8_t bit29 : 1;
+	uint8_t bit30 : 1;
+	uint8_t bit31 : 1;
 };
 
 enum TeamColor
 {
-	Blue = 0,
-	Yellow = 1
+	TEAM_COLOR_BLUE = 0,
+	TEAM_COLOR_YELLOW = 1
+};
+
+enum FeedbackRequestType
+{
+	FEEDBACK_TYPE_DEBUG = 0,
+	FEEDBACK_TYPE_INFO = 1,
+	FEEDBACK_TYPE_FATAL = 2,
+	FEEDBACK_TYPE_CUSTOM = 3
+};
+
+enum ShootType
+{
+	SHOOT_TYPE_DIRECT = 0,
+	SHOOT_TYPE_CHIP = 1
 };
 
 struct RobotCommand
 {
 	// commands
-	Vector2f   velocity;
-	bool       halt;
-	FLOAT_32      omega;
-	FLOAT_32      target_orientation;
+	struct  Vector2f   velocity;
+	union  FLOAT_32    omega;
+	union  FLOAT_32    target_orientation;
 
-	FLOAT_32      orientation;
+	union  FLOAT_32    orientation;
 
-	FLOAT_32      direct;
-	FLOAT_32      chip;
-	FLOAT_32      dribbler;
-	FLOAT_32      servo;
+	union  FLOAT_32    shoot_power;
+	union  FLOAT_32    dribbler;
+	union  FLOAT_32    servo;
 
 	// debug
-	FLOAT_32      beep;
+	uint8_t      beep;
 
-	enum FeedbackRequestType
-	{
-		None = 0,
-		Debug = 1,
-		Info = 2,
-		Fatal = 3,
-		Custom = 4
-	};
-
-	FeedbackRequestType feedback;
+	enum ShootType shoot_type;
+	enum FeedbackRequestType feedback;
+	uint8_t            halt : 1;
+	uint8_t            has_orientation : 1;
 };
 
 struct RobotConfig
 {
-	FLOAT_32      kp;
-	FLOAT_32      ki;
-	FLOAT_32      kd;
-	FLOAT_32      i_limit;
+	union FLOAT_32      kp;
+	union FLOAT_32      ki;
+	union FLOAT_32      kd;
+	union FLOAT_32      i_limit;
 
-	FLOAT_32      gyro_offset;
-	FLOAT_32      head_offset;
+	union FLOAT_32      head_offset;
 
-	Vector3f   direct_coeffs;
-	Vector3f   chip_coeffs;
+	struct Vector3f   direct_coeffs;
+	struct Vector3f   chip_coeffs;
 };
 
 struct RobotMatrix
 {
-	Vector3f matrix[4];
+	struct Vector3f matrix[4];
 };
 
 struct RobotFeedback
 {
-	FLOAT_32     battery_voltage;
-	FLOAT_32     capacitor_voltage;
+	union FLOAT_32     battery_voltage;
+	union FLOAT_32     capacitor_voltage;
 
-	bool      ball_detected;
+	union FLOAT_32     omega;
+	union FLOAT_32     orientation;
+	
+	struct Vector4f  motor_velocity;
+	struct Vector4f  motor_target;
 
-	FLOAT_32     omega;
-	FLOAT_32     orientation;
+	struct bits8_t  motor_fault;
+	struct bits8_t button_status;
 
-	bool      fault;
-	bool      encoder_fault[4];
-	bool      motor_fault[4];
-	Vector4f  motor_velocity;
-	Vector4f  motor_target;
-
-	bool      button_status[8];
-	bool      booster_enabled;
-	bool      dribbler_connected;
+	uint8_t      fault : 1;
+	uint8_t      ball_detected : 1;
+	uint8_t      booster_enabled : 1;
+	uint8_t      dribbler_connected : 1;
 };
 
 struct RobotFeedbackCustom
 {
-	size_t    length;
+	uint32_t    length;
 	void*     debug_dump;
 };
+
+#endif
