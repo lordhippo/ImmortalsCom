@@ -4,7 +4,6 @@ include("${CMAKE_SOURCE_DIR}/CMake/Helpers.cmake")
 
 set_project_paths()
 enable_parallel_build()
-enable_cpp14_support()
 
 find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
