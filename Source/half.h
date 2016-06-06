@@ -2,7 +2,7 @@
 #define HALF_H
 #include <stdint.h>
 
-union FLOAT_32
+union float_32_u_t
 {
 	float    f32;
 	uint32_t u32;

@@ -8,7 +8,7 @@
 
 void test_command()
 {
-	struct RobotCommand data;
+	struct robot_command_msg_t data;
 	data.velocity.x.f32 = 100.5f;
 	data.velocity.y.f32 = -254.0f;
 	data.halt = TRUE;
@@ -25,7 +25,7 @@ void test_command()
 	uint8_t buffer[PAYLOAD_SIZE];
 	size_t length = write_robot_command_fixed(buffer, &data);
 
-	struct RobotCommand parsed_data;
+	struct robot_command_msg_t parsed_data;
 	uint8_t result = read_robot_command_fixed(buffer, length, &parsed_data);
 
 	printf("-Robot command [%d] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
@@ -48,7 +48,7 @@ void test_command()
 
 void test_config()
 {
-	struct RobotConfig data;
+	struct robot_config_msg_t data;
 	data.kp.f32 = 1.0f;
 	data.ki.f32 = -2.0f;
 	data.kd.f32 = 3.0f;
@@ -66,7 +66,7 @@ void test_config()
 	uint8_t buffer[PAYLOAD_SIZE];
 	size_t length = write_robot_config_fixed(buffer, &data);
 
-	struct RobotConfig parsed_data;
+	struct robot_config_msg_t parsed_data;
 	uint8_t result = read_robot_config_fixed(buffer, length, &parsed_data);
 
 	printf("-Robot config [%d] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
@@ -91,7 +91,7 @@ void test_config()
 
 void test_matrix()
 {
-	struct RobotMatrix data;
+	struct robot_matrix_msg_t data;
 	
 	data.matrix[0].x.f32 = 1.0f;
 	data.matrix[0].y.f32 = -2.0f;
@@ -112,7 +112,7 @@ void test_matrix()
 	uint8_t buffer[PAYLOAD_SIZE];
 	size_t length = write_robot_matrix_fixed(buffer, &data);
 
-	struct RobotMatrix parsed_data;
+	struct robot_matrix_msg_t parsed_data;
 	uint8_t result = read_robot_matrix_fixed(buffer, length, &parsed_data);
 
 	printf("-Robot matrix [%d] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
@@ -139,7 +139,7 @@ void test_matrix()
 
 void test_feedback()
 {
-	struct RobotFeedback data;
+	struct robot_feedback_msg_t data;
 	data.battery_voltage.f32 = 1.0f;
 	data.capacitor_voltage.f32 = -2.0f;
 	data.omega.f32 = 3.0f;
@@ -183,7 +183,7 @@ void test_feedback()
 	uint8_t buffer[PAYLOAD_SIZE];
 	size_t length = write_robot_feedback_fixed(buffer, &data);
 
-	struct RobotFeedback parsed_data;
+	struct robot_feedback_msg_t parsed_data;
 	uint8_t result = read_robot_feedback_fixed(buffer, length, &parsed_data);
 
 	printf("-Robot feedback [%d] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");

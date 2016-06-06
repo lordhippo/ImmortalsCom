@@ -109,43 +109,43 @@ void write_uint32(uint8_t* const buffer, size_t* const pos, const uint32_t data)
 	*pos += 4;
 }
 
-void write_float_h(uint8_t* const buffer, size_t* const pos, const union FLOAT_32 data)
+void write_float_h(uint8_t* const buffer, size_t* const pos, const union float_32_u_t data)
 {
 	write_uint16(buffer, pos, half_from_float(data.u32));
 }
 
-void write_float(uint8_t* const buffer, size_t* const pos, const union FLOAT_32 data)
+void write_float(uint8_t* const buffer, size_t* const pos, const union float_32_u_t data)
 {
 	write_uint32(buffer, pos, data.u32);
 }
 
-void write_v2f_h(uint8_t* const buffer, size_t* const pos, const struct Vector2f* const data)
+void write_v2f_h(uint8_t* const buffer, size_t* const pos, const struct vector2f_t* const data)
 {
 	write_float_h(buffer, pos, data->x);
 	write_float_h(buffer, pos, data->y);
 }
 
-void write_v2f(uint8_t* const buffer, size_t* const pos, const struct Vector2f* const data)
+void write_v2f(uint8_t* const buffer, size_t* const pos, const struct vector2f_t* const data)
 {
 	write_float(buffer, pos, data->x);
 	write_float(buffer, pos, data->y);
 }
 
-void write_v3f_h(uint8_t* const buffer, size_t* const pos, const struct Vector3f* const data)
+void write_v3f_h(uint8_t* const buffer, size_t* const pos, const struct vector3f_t* const data)
 {
 	write_float_h(buffer, pos, data->x);
 	write_float_h(buffer, pos, data->y);
 	write_float_h(buffer, pos, data->z);
 }
 
-void write_v3f(uint8_t* const buffer, size_t* const pos, const struct Vector3f* const data)
+void write_v3f(uint8_t* const buffer, size_t* const pos, const struct vector3f_t* const data)
 {
 	write_float(buffer, pos, data->x);
 	write_float(buffer, pos, data->y);
 	write_float(buffer, pos, data->z);
 }
 
-void write_v4f_h(uint8_t* const buffer, size_t* const pos, const struct Vector4f* const data)
+void write_v4f_h(uint8_t* const buffer, size_t* const pos, const struct vector4f_t* const data)
 {
 	write_float_h(buffer, pos, data->x);
 	write_float_h(buffer, pos, data->y);
@@ -153,7 +153,7 @@ void write_v4f_h(uint8_t* const buffer, size_t* const pos, const struct Vector4f
 	write_float_h(buffer, pos, data->w);
 }
 
-void write_v4f(uint8_t* const buffer, size_t* const pos, const struct Vector4f* const data)
+void write_v4f(uint8_t* const buffer, size_t* const pos, const struct vector4f_t* const data)
 {
 	write_float(buffer, pos, data->x);
 	write_float(buffer, pos, data->y);
@@ -161,7 +161,7 @@ void write_v4f(uint8_t* const buffer, size_t* const pos, const struct Vector4f* 
 	write_float(buffer, pos, data->w);
 }
 
-size_t write_robot_command_fixed(uint8_t* const buffer, const struct RobotCommand* const data)
+size_t write_robot_command_fixed(uint8_t* const buffer, const struct robot_command_msg_t* const data)
 {
 	memset(buffer, 0, PAYLOAD_SIZE);
 
@@ -192,7 +192,7 @@ size_t write_robot_command_fixed(uint8_t* const buffer, const struct RobotComman
 	return size;
 }
 
-size_t write_robot_config_fixed(uint8_t* const buffer, const struct RobotConfig* const data)
+size_t write_robot_config_fixed(uint8_t* const buffer, const struct robot_config_msg_t* const data)
 {
 	memset(buffer, 0, PAYLOAD_SIZE);
 
@@ -213,7 +213,7 @@ size_t write_robot_config_fixed(uint8_t* const buffer, const struct RobotConfig*
 	return size;
 }
 
-size_t write_robot_matrix_fixed(uint8_t* const buffer, const struct RobotMatrix* const data)
+size_t write_robot_matrix_fixed(uint8_t* const buffer, const struct robot_matrix_msg_t* const data)
 {
 	memset(buffer, 0, PAYLOAD_SIZE);
 
@@ -229,7 +229,7 @@ size_t write_robot_matrix_fixed(uint8_t* const buffer, const struct RobotMatrix*
 	return size;
 }
 
-size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct RobotFeedback* const data)
+size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feedback_msg_t* const data)
 {
 	memset(buffer, 0, PAYLOAD_SIZE);
 
@@ -260,7 +260,7 @@ size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct RobotFeedb
 	return size;
 }
 
-size_t write_robot_feedback_custom_fixed(uint8_t* const buffer, const struct RobotFeedbackCustom* const data)
+size_t write_robot_feedback_custom_fixed(uint8_t* const buffer, const struct robot_feedback_custom_t* const data)
 {
 	memset(buffer, 0, PAYLOAD_SIZE);
 
