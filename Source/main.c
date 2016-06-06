@@ -28,7 +28,7 @@ void test_command()
 	struct robot_command_msg_t parsed_data;
 	uint8_t result = read_robot_command_fixed(buffer, length, &parsed_data);
 
-	printf("-Robot command [%d] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
+	printf("-Robot command [%lu] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
 	if (result == PARSE_RESULT_SUCCESS)
 	{
 		printf("--%s : [ %.2f : %.2f ]\n", "velocity.x", data.velocity.x.f32, parsed_data.velocity.x.f32);
@@ -69,7 +69,7 @@ void test_config()
 	struct robot_config_msg_t parsed_data;
 	uint8_t result = read_robot_config_fixed(buffer, length, &parsed_data);
 
-	printf("-Robot config [%d] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
+	printf("-Robot config [%lu] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
 
 	if (result == PARSE_RESULT_SUCCESS)
 	{
@@ -115,7 +115,7 @@ void test_matrix()
 	struct robot_matrix_msg_t parsed_data;
 	uint8_t result = read_robot_matrix_fixed(buffer, length, &parsed_data);
 
-	printf("-Robot matrix [%d] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
+	printf("-Robot matrix [%lu] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
 
 	if (result == PARSE_RESULT_SUCCESS)
 	{
@@ -186,7 +186,7 @@ void test_feedback()
 	struct robot_feedback_msg_t parsed_data;
 	uint8_t result = read_robot_feedback_fixed(buffer, length, &parsed_data);
 
-	printf("-Robot feedback [%d] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
+	printf("-Robot feedback [%lu] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
 
 	if (result == PARSE_RESULT_SUCCESS)
 	{
