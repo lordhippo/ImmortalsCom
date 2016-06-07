@@ -1,6 +1,8 @@
 #ifndef DATA_LITE_H
 #define DATA_LITE_H
 
+#include <stdint.h>
+
 #include "half.h"
 
 struct vector2f_t

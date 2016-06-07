@@ -189,8 +189,8 @@ uint8_t read_robot_command_fixed(const uint8_t* const buffer, const size_t size,
 
 	uint8_t packed_data;
 	read_uint8(buffer, &pos, &packed_data);
-	data->shoot_type = (enum ShootType) (packed_data & 0x01);
-	data->feedback = (enum FeedbackRequestType) ((packed_data >> 1) & 0x03);
+	data->shoot_type = (enum shoot_type_e) (packed_data & 0x01);
+	data->feedback = (enum feedback_request_e) ((packed_data >> 1) & 0x03);
 	data->halt = (packed_data >> 3) & 0x01;
 	data->has_orientation = (packed_data >> 4) & 0x01;
 
