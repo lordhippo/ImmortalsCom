@@ -2,6 +2,7 @@
 #define DATA_LITE_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "half.h"
 
@@ -28,70 +29,70 @@ struct vector4f_t
 
 struct bits8_t
 {
-	uint8_t bit0 : 1;
-	uint8_t bit1 : 1;
-	uint8_t bit2 : 1;
-	uint8_t bit3 : 1;
-	uint8_t bit4 : 1;
-	uint8_t bit5 : 1;
-	uint8_t bit6 : 1;
-	uint8_t bit7 : 1;
+	bool bit0 : 1;
+	bool bit1 : 1;
+	bool bit2 : 1;
+	bool bit3 : 1;
+	bool bit4 : 1;
+	bool bit5 : 1;
+	bool bit6 : 1;
+	bool bit7 : 1;
 };
 
 struct bits16_t
 {
-	uint8_t bit0 : 1;
-	uint8_t bit1 : 1;
-	uint8_t bit2 : 1;
-	uint8_t bit3 : 1;
-	uint8_t bit4 : 1;
-	uint8_t bit5 : 1;
-	uint8_t bit6 : 1;
-	uint8_t bit7 : 1;
-	uint8_t bit8 : 1;
-	uint8_t bit9 : 1;
-	uint8_t bit10 : 1;
-	uint8_t bit11 : 1;
-	uint8_t bit12 : 1;
-	uint8_t bit13 : 1;
-	uint8_t bit14 : 1;
-	uint8_t bit15 : 1;
+	bool bit0 : 1;
+	bool bit1 : 1;
+	bool bit2 : 1;
+	bool bit3 : 1;
+	bool bit4 : 1;
+	bool bit5 : 1;
+	bool bit6 : 1;
+	bool bit7 : 1;
+	bool bit8 : 1;
+	bool bit9 : 1;
+	bool bit10 : 1;
+	bool bit11 : 1;
+	bool bit12 : 1;
+	bool bit13 : 1;
+	bool bit14 : 1;
+	bool bit15 : 1;
 };
 
 struct bits32_t
 {
-	uint8_t bit0  : 1;
-	uint8_t bit1  : 1;
-	uint8_t bit2  : 1;
-	uint8_t bit3  : 1;
-	uint8_t bit4  : 1;
-	uint8_t bit5  : 1;
-	uint8_t bit6  : 1;
-	uint8_t bit7  : 1;
-	uint8_t bit8  : 1;
-	uint8_t bit9  : 1;
-	uint8_t bit10 : 1;
-	uint8_t bit11 : 1;
-	uint8_t bit12 : 1;
-	uint8_t bit13 : 1;
-	uint8_t bit14 : 1;
-	uint8_t bit15 : 1;
-	uint8_t bit16 : 1;
-	uint8_t bit17 : 1;
-	uint8_t bit18 : 1;
-	uint8_t bit19 : 1;
-	uint8_t bit20 : 1;
-	uint8_t bit21 : 1;
-	uint8_t bit22 : 1;
-	uint8_t bit23 : 1;
-	uint8_t bit24 : 1;
-	uint8_t bit25 : 1;
-	uint8_t bit26 : 1;
-	uint8_t bit27 : 1;
-	uint8_t bit28 : 1;
-	uint8_t bit29 : 1;
-	uint8_t bit30 : 1;
-	uint8_t bit31 : 1;
+	bool bit0  : 1;
+	bool bit1  : 1;
+	bool bit2  : 1;
+	bool bit3  : 1;
+	bool bit4  : 1;
+	bool bit5  : 1;
+	bool bit6  : 1;
+	bool bit7  : 1;
+	bool bit8  : 1;
+	bool bit9  : 1;
+	bool bit10 : 1;
+	bool bit11 : 1;
+	bool bit12 : 1;
+	bool bit13 : 1;
+	bool bit14 : 1;
+	bool bit15 : 1;
+	bool bit16 : 1;
+	bool bit17 : 1;
+	bool bit18 : 1;
+	bool bit19 : 1;
+	bool bit20 : 1;
+	bool bit21 : 1;
+	bool bit22 : 1;
+	bool bit23 : 1;
+	bool bit24 : 1;
+	bool bit25 : 1;
+	bool bit26 : 1;
+	bool bit27 : 1;
+	bool bit28 : 1;
+	bool bit29 : 1;
+	bool bit30 : 1;
+	bool bit31 : 1;
 };
 
 enum team_color_e
@@ -132,8 +133,8 @@ struct robot_command_msg_t
 
 	enum shoot_type_e shoot_type;
 	enum feedback_request_e feedback;
-	uint8_t            halt : 1;
-	uint8_t            has_orientation : 1;
+	bool            halt : 1;
+	bool            has_orientation : 1;
 };
 
 struct robot_config_msg_t
@@ -168,10 +169,10 @@ struct robot_feedback_msg_t
 	struct bits8_t  motor_fault;
 	struct bits8_t button_status;
 
-	uint8_t      fault : 1;
-	uint8_t      ball_detected : 1;
-	uint8_t      booster_enabled : 1;
-	uint8_t      dribbler_connected : 1;
+	bool      fault : 1;
+	bool      ball_detected : 1;
+	bool      booster_enabled : 1;
+	bool      dribbler_connected : 1;
 };
 
 struct robot_feedback_custom_t
