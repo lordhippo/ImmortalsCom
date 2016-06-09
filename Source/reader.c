@@ -190,28 +190,46 @@ uint8_t read_robot_command_fixed(const uint8_t* const buffer, const size_t size,
 	uint8_t packed_data;
 	read_uint8(buffer, &pos, &packed_data);
 	data->shoot_type = (enum shoot_type_e) (packed_data & 0x01);
-	data->feedback = (enum feedback_request_e) ((packed_data >> 1) & 0x03);
+	data->feedback_request = (enum feedback_type_e) ((packed_data >> 1) & 0x03);
 	data->halt = (packed_data >> 3) & 0x01;
 	data->has_orientation = (packed_data >> 4) & 0x01;
 
 	return (pos == size ? PARSE_RESULT_SUCCESS : PARSE_RESULT_SIZE_MISMATCH);
 }
 
-uint8_t read_robot_config_fixed(const uint8_t* const buffer, const size_t size, struct robot_config_msg_t* const data)
+uint8_t read_robot_control_config_fixed(const uint8_t* const buffer, const size_t size, struct robot_control_config_msg_t* const data)
 {
 	size_t pos = 0;
 
 	uint8_t header;
 	read_uint8(buffer, &pos, &header);
-	if (header != MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_CONFIG))
+	if (header != MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_CONFIG_CONTROL))
 		return PARSE_RESULT_HEADER_CORRUPTED;
 
-	read_float_h(buffer, &pos, &data->kp);
-	read_float_h(buffer, &pos, &data->ki);
-	read_float_h(buffer, &pos, &data->kd);
-	read_float_h(buffer, &pos, &data->i_limit);
+	read_float_h(buffer, &pos, &data->motor_kp);
+	read_float_h(buffer, &pos, &data->motor_ki);
+	read_float_h(buffer, &pos, &data->motor_kd);
+	read_float_h(buffer, &pos, &data->motor_i_limit);
 
-	read_float_h(buffer, &pos, &data->head_offset);
+	read_float_h(buffer, &pos, &data->gyro_kp);
+	read_float_h(buffer, &pos, &data->gyro_ki);
+	read_float_h(buffer, &pos, &data->gyro_kd);
+	read_float_h(buffer, &pos, &data->gyro_i_limit);
+
+	read_float_h(buffer, &pos, &data->max_w_acc);
+	read_float_h(buffer, &pos, &data->max_w_dec);
+
+	return (pos == size ? PARSE_RESULT_SUCCESS : PARSE_RESULT_SIZE_MISMATCH);
+}
+
+uint8_t read_robot_shoot_config_fixed(const uint8_t* const buffer, const size_t size, struct robot_shoot_config_msg_t* const data)
+{
+	size_t pos = 0;
+
+	uint8_t header;
+	read_uint8(buffer, &pos, &header);
+	if (header != MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_CONFIG_SHOOT))
+		return PARSE_RESULT_HEADER_CORRUPTED;
 
 	read_v3f_h(buffer, &pos, &data->direct_coeffs);
 	read_v3f_h(buffer, &pos, &data->chip_coeffs);
@@ -242,20 +260,12 @@ uint8_t read_robot_feedback_fixed(const uint8_t* const buffer, const size_t size
 
 	uint8_t header;
 	read_uint8(buffer, &pos, &header);
-	if (header != MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_FEEDBACK))
+	if (MESSAGE_VERSION(header) != PROTO_VERSION_FIXED ||
+		MESSAGE_TYPE(header) < TYPE_FEEDBACK_BASE ||
+		MESSAGE_TYPE(header) >= TYPE_FEEDBACK_MAX)
 		return PARSE_RESULT_HEADER_CORRUPTED;
 
-	read_float_h(buffer, &pos, &data->battery_voltage);
-	read_float_h(buffer, &pos, &data->capacitor_voltage);
-
-	read_float_h(buffer, &pos, &data->omega);
-	read_float_h(buffer, &pos, &data->orientation);
-
-	read_v4f_h(buffer, &pos, &data->motor_velocity);
-	read_v4f_h(buffer, &pos, &data->motor_target);
-
-	read_bits8(buffer, &pos, &data->motor_fault);
-	read_bits8(buffer, &pos, &data->button_status);
+	const enum feedback_type_e type = (enum feedback_type_e)(MESSAGE_TYPE(header) - TYPE_FEEDBACK_BASE);
 
 	uint8_t packed_data;
 	read_uint8(buffer, &pos, &packed_data);
@@ -264,6 +274,25 @@ uint8_t read_robot_feedback_fixed(const uint8_t* const buffer, const size_t size
 	data->ball_detected = (packed_data >> 1) & 0x01;
 	data->booster_enabled = (packed_data >> 2) & 0x01;
 	data->dribbler_connected = (packed_data >> 3) & 0x01;
+
+	read_bits8(buffer, &pos, &data->motor_fault);
+
+	if (type <= FEEDBACK_TYPE_INFO)
+	{
+		read_float_h(buffer, &pos, &data->battery_voltage);
+		read_float_h(buffer, &pos, &data->capacitor_voltage);
+
+		if (type <= FEEDBACK_TYPE_DEBUG)
+		{
+			read_float_h(buffer, &pos, &data->omega);
+			read_float_h(buffer, &pos, &data->orientation);
+
+			read_v4f_h(buffer, &pos, &data->motor_velocity);
+			read_v4f_h(buffer, &pos, &data->motor_target);
+
+			read_bits8(buffer, &pos, &data->button_status);
+		}
+	}
 
 	return (pos == size ? PARSE_RESULT_SUCCESS : PARSE_RESULT_SIZE_MISMATCH);
 }
@@ -274,13 +303,23 @@ uint8_t read_robot_feedback_custom_fixed(const uint8_t* const buffer, const size
 
 	uint8_t header;
 	read_uint8(buffer, &pos, &header);
-	if (header != MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_FEEDBACK_CUSTOM))
+	if (header != MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_FEEDBACK_BASE + FEEDBACK_TYPE_CUSTOM))
 		return PARSE_RESULT_HEADER_CORRUPTED;
 
 	uint8_t data_length;
 	read_uint8(buffer, &pos, &data_length);
 	data->length = data_length;
 	read_bytes(buffer, &pos, &data->debug_dump, data->length);
+
+	return (pos == size ? PARSE_RESULT_SUCCESS : PARSE_RESULT_SIZE_MISMATCH);
+}
+
+uint8_t read_robot_wrapper_fixed(const uint8_t* const buffer, const size_t size, struct robot_wrapper_msg_t* const data)
+{
+	size_t pos = 0;
+
+	read_uint8(buffer, &pos, &data->length);
+	read_bytes(buffer, &pos, &data->data, MAX_PAYLOAD_SIZE - 1);
 
 	return (pos == size ? PARSE_RESULT_SUCCESS : PARSE_RESULT_SIZE_MISMATCH);
 }

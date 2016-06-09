@@ -11,7 +11,7 @@ void test_command()
 	struct robot_command_msg_t data;
 	data.velocity.x.f32 = 100.5f;
 	data.velocity.y.f32 = -254.0f;
-	data.halt = TRUE;
+	data.halt = true;
 	data.omega.f32 = 200.0f;
 	data.target_orientation.f32 = 135.0f;
 	data.orientation.f32 = 90.0f;
@@ -20,9 +20,9 @@ void test_command()
 	data.servo.f32 = 70.0f;
 	data.beep = 190;
 	data.shoot_type = SHOOT_TYPE_DIRECT;
-	data.feedback = FEEDBACK_TYPE_DEBUG;
+	data.feedback_request = FEEDBACK_TYPE_DEBUG;
 
-	uint8_t buffer[PAYLOAD_SIZE];
+	uint8_t buffer[MAX_PAYLOAD_SIZE];
 	size_t length = write_robot_command_fixed(buffer, &data);
 
 	struct robot_command_msg_t parsed_data;
@@ -42,20 +42,54 @@ void test_command()
 		printf("--%s : [ %.2f : %.2f ]\n", "servo", data.servo.f32, parsed_data.servo.f32);
 		printf("--%s : [ %hhu : %hhu ]\n", "beep", data.beep, parsed_data.beep);
 		printf("--%s : [ %d : %d ]\n", "shoot_type", data.shoot_type, parsed_data.shoot_type);
-		printf("--%s : [ %d : %d ]\n", "feedback", data.feedback, parsed_data.feedback);
+		printf("--%s : [ %d : %d ]\n", "feedback", data.feedback_request, parsed_data.feedback_request);
 	}
 }
 
-void test_config()
+void test_config_control()
 {
-	struct robot_config_msg_t data;
-	data.kp.f32 = 1.0f;
-	data.ki.f32 = -2.0f;
-	data.kd.f32 = 3.0f;
-	data.i_limit.f32 = -4.0f;
+	struct robot_control_config_msg_t data;
+	data.motor_kp.f32 = 1.0f;
+	data.motor_ki.f32 = -2.0f;
+	data.motor_kd.f32 = 3.0f;
+	data.motor_i_limit.f32 = -4.0f;
 
-	data.head_offset.f32 = -6.0f;
+	data.gyro_kp.f32 = 11.0f;
+	data.gyro_ki.f32 = -22.0f;
+	data.gyro_kd.f32 = 36.0f;
+	data.gyro_i_limit.f32 = -14.012f;
 
+	data.max_w_acc.f32 = 336.10f;
+	data.max_w_dec.f32 = -154.03f;
+
+	uint8_t buffer[MAX_PAYLOAD_SIZE];
+	size_t length = write_robot_control_config_fixed(buffer, &data);
+
+	struct robot_control_config_msg_t parsed_data;
+	uint8_t result = read_robot_control_config_fixed(buffer, length, &parsed_data);
+
+	printf("-Robot control config [%lu] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
+
+	if (result == PARSE_RESULT_SUCCESS)
+	{
+		printf("--%s : [ %.2f : %.2f ]\n", "motor kp", data.motor_kp.f32, parsed_data.motor_kp.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "motor ki", data.motor_ki.f32, parsed_data.motor_ki.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "motor kd", data.motor_kd.f32, parsed_data.motor_kd.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "motor i_limit", data.motor_i_limit.f32, parsed_data.motor_i_limit.f32);
+
+		printf("--%s : [ %.2f : %.2f ]\n", "gyro kp", data.gyro_kp.f32, parsed_data.gyro_kp.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "gyro ki", data.gyro_ki.f32, parsed_data.gyro_ki.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "gyro kd", data.gyro_kd.f32, parsed_data.gyro_kd.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "gyro i_limit", data.gyro_i_limit.f32, parsed_data.gyro_i_limit.f32);
+
+		printf("--%s : [ %.2f : %.2f ]\n", "max_w_acc", data.max_w_acc.f32, parsed_data.max_w_acc.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "max_w_dec", data.max_w_dec.f32, parsed_data.max_w_dec.f32);
+	}
+}
+
+void test_config_shoot()
+{
+	struct robot_shoot_config_msg_t data;
 	data.direct_coeffs.x.f32 = 100.0f;
 	data.direct_coeffs.y.f32 = 150.0f;
 	data.direct_coeffs.z.f32 = 250.0f;
@@ -63,22 +97,16 @@ void test_config()
 	data.chip_coeffs.y.f32 = 1050.0f;
 	data.chip_coeffs.z.f32 = 2500.0f;
 
-	uint8_t buffer[PAYLOAD_SIZE];
-	size_t length = write_robot_config_fixed(buffer, &data);
+	uint8_t buffer[MAX_PAYLOAD_SIZE];
+	size_t length = write_robot_shoot_config_fixed(buffer, &data);
 
-	struct robot_config_msg_t parsed_data;
-	uint8_t result = read_robot_config_fixed(buffer, length, &parsed_data);
+	struct robot_shoot_config_msg_t parsed_data;
+	uint8_t result = read_robot_shoot_config_fixed(buffer, length, &parsed_data);
 
-	printf("-Robot config [%lu] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
+	printf("-Robot shoot config [%lu] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
 
 	if (result == PARSE_RESULT_SUCCESS)
 	{
-		printf("--%s : [ %.2f : %.2f ]\n", "kp", data.kp.f32, parsed_data.kp.f32);
-		printf("--%s : [ %.2f : %.2f ]\n", "ki", data.ki.f32, parsed_data.ki.f32);
-		printf("--%s : [ %.2f : %.2f ]\n", "kd", data.kd.f32, parsed_data.kd.f32);
-		printf("--%s : [ %.2f : %.2f ]\n", "i_limit", data.i_limit.f32, parsed_data.i_limit.f32);
-		printf("--%s : [ %.2f : %.2f ]\n", "head_offset", data.head_offset.f32, parsed_data.head_offset.f32);
-
 		printf("--%s : [ %.2f : %.2f ]\n", "direct_coeffs.x", data.direct_coeffs.x.f32, parsed_data.direct_coeffs.x.f32);
 		printf("--%s : [ %.2f : %.2f ]\n", "direct_coeffs.y", data.direct_coeffs.y.f32, parsed_data.direct_coeffs.y.f32);
 		printf("--%s : [ %.2f : %.2f ]\n", "direct_coeffs.z", data.direct_coeffs.z.f32, parsed_data.direct_coeffs.z.f32);
@@ -109,7 +137,7 @@ void test_matrix()
 	data.matrix[3].y.f32 = 1050.0f;
 	data.matrix[3].z.f32 = 2500.0f;
 
-	uint8_t buffer[PAYLOAD_SIZE];
+	uint8_t buffer[MAX_PAYLOAD_SIZE];
 	size_t length = write_robot_matrix_fixed(buffer, &data);
 
 	struct robot_matrix_msg_t parsed_data;
@@ -155,33 +183,33 @@ void test_feedback()
 	data.motor_target.z.f32 = 1050.0f;
 	data.motor_target.w.f32 = 2500.0f;
 
-	data.ball_detected = TRUE;
-	data.fault = TRUE;
+	data.ball_detected = true;
+	data.fault = true;
 
-	data.motor_fault.bit0 = FALSE;
-	data.motor_fault.bit1 = FALSE;
-	data.motor_fault.bit2 = FALSE;
-	data.motor_fault.bit3 = TRUE;
+	data.motor_fault.bit0 = false;
+	data.motor_fault.bit1 = false;
+	data.motor_fault.bit2 = false;
+	data.motor_fault.bit3 = true;
 
-	data.motor_fault.bit4 = FALSE;
-	data.motor_fault.bit5 = FALSE;
-	data.motor_fault.bit6 = TRUE;
-	data.motor_fault.bit7 = FALSE;
+	data.motor_fault.bit4 = false;
+	data.motor_fault.bit5 = false;
+	data.motor_fault.bit6 = true;
+	data.motor_fault.bit7 = false;
 
-	data.button_status.bit0 = FALSE;
-	data.button_status.bit1 = FALSE;
-	data.button_status.bit2 = FALSE;
-	data.button_status.bit3 = FALSE;
-	data.button_status.bit4 = TRUE;
-	data.button_status.bit5 = FALSE;
-	data.button_status.bit6 = TRUE;
-	data.button_status.bit7 = TRUE;
+	data.button_status.bit0 = false;
+	data.button_status.bit1 = false;
+	data.button_status.bit2 = false;
+	data.button_status.bit3 = false;
+	data.button_status.bit4 = true;
+	data.button_status.bit5 = false;
+	data.button_status.bit6 = true;
+	data.button_status.bit7 = true;
 
-	data.booster_enabled = TRUE;
-	data.dribbler_connected = FALSE;
+	data.booster_enabled = true;
+	data.dribbler_connected = false;
 
-	uint8_t buffer[PAYLOAD_SIZE];
-	size_t length = write_robot_feedback_fixed(buffer, &data);
+	uint8_t buffer[MAX_PAYLOAD_SIZE];
+	size_t length = write_robot_feedback_fixed(buffer, &data, FEEDBACK_TYPE_DEBUG);
 
 	struct robot_feedback_msg_t parsed_data;
 	uint8_t result = read_robot_feedback_fixed(buffer, length, &parsed_data);
@@ -216,7 +244,8 @@ void test_feedback()
 int main()
 {
 	test_command();
-	test_config();
+	test_config_control();
+	test_config_shoot();
 	test_matrix();
 	test_feedback();
 

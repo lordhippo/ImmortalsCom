@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "half.h"
+#include "defines.h"
 
 struct vector2f_t
 {
@@ -101,7 +102,7 @@ enum team_color_e
 	TEAM_COLOR_YELLOW = 1
 };
 
-enum feedback_request_e
+enum feedback_type_e
 {
 	FEEDBACK_TYPE_DEBUG = 0,
 	FEEDBACK_TYPE_INFO = 1,
@@ -132,20 +133,29 @@ struct robot_command_msg_t
 	uint8_t      beep;
 
 	enum shoot_type_e shoot_type;
-	enum feedback_request_e feedback;
+	enum feedback_type_e feedback_request;
 	bool            halt : 1;
 	bool            has_orientation : 1;
 };
 
-struct robot_config_msg_t
+struct robot_control_config_msg_t
 {
-	union float_32_u_t      kp;
-	union float_32_u_t      ki;
-	union float_32_u_t      kd;
-	union float_32_u_t      i_limit;
+	union float_32_u_t      motor_kp;
+	union float_32_u_t      motor_ki;
+	union float_32_u_t      motor_kd;
+	union float_32_u_t      motor_i_limit;
 
-	union float_32_u_t      head_offset;
+	union float_32_u_t      gyro_kp;
+	union float_32_u_t      gyro_ki;
+	union float_32_u_t      gyro_kd;
+	union float_32_u_t      gyro_i_limit;
 
+	union float_32_u_t      max_w_acc;
+	union float_32_u_t      max_w_dec;
+};
+
+struct robot_shoot_config_msg_t
+{
 	struct vector3f_t   direct_coeffs;
 	struct vector3f_t   chip_coeffs;
 };
@@ -177,8 +187,14 @@ struct robot_feedback_msg_t
 
 struct robot_feedback_custom_t
 {
-	uint32_t    length;
+	uint8_t    length;
 	void*     debug_dump;
+};
+
+struct robot_wrapper_msg_t
+{
+	uint8_t  length;
+	uint8_t  data[MAX_PAYLOAD_SIZE - 1];
 };
 
 #endif

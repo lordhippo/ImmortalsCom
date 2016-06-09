@@ -163,7 +163,7 @@ void write_v4f(uint8_t* const buffer, size_t* const pos, const struct vector4f_t
 
 size_t write_robot_command_fixed(uint8_t* const buffer, const struct robot_command_msg_t* const data)
 {
-	memset(buffer, 0, PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE);
 
 	size_t size = 0;
 
@@ -184,7 +184,7 @@ size_t write_robot_command_fixed(uint8_t* const buffer, const struct robot_comma
 
 	const uint8_t packed_data = 
 		((uint8_t)data->shoot_type) |
-		((uint8_t)data->feedback) << 1 |
+		((uint8_t)data->feedback_request) << 1 |
 		(data->halt << 3) | 
 		(data->has_orientation << 4);;
 	write_uint8(buffer, &size, packed_data);
@@ -192,20 +192,37 @@ size_t write_robot_command_fixed(uint8_t* const buffer, const struct robot_comma
 	return size;
 }
 
-size_t write_robot_config_fixed(uint8_t* const buffer, const struct robot_config_msg_t* const data)
+size_t write_robot_control_config_fixed(uint8_t* const buffer, const struct robot_control_config_msg_t* const data)
 {
-	memset(buffer, 0, PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE);
 
 	size_t size = 0;
 
-	write_uint8(buffer, &size, MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_CONFIG));
+	write_uint8(buffer, &size, MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_CONFIG_CONTROL));
 
-	write_float_h(buffer, &size, data->kp);
-	write_float_h(buffer, &size, data->ki);
-	write_float_h(buffer, &size, data->kd);
-	write_float_h(buffer, &size, data->i_limit);
+	write_float_h(buffer, &size, data->motor_kp);
+	write_float_h(buffer, &size, data->motor_ki);
+	write_float_h(buffer, &size, data->motor_kd);
+	write_float_h(buffer, &size, data->motor_i_limit);
 
-	write_float_h(buffer, &size, data->head_offset);
+	write_float_h(buffer, &size, data->gyro_kp);
+	write_float_h(buffer, &size, data->gyro_ki);
+	write_float_h(buffer, &size, data->gyro_kd);
+	write_float_h(buffer, &size, data->gyro_i_limit);
+
+	write_float_h(buffer, &size, data->max_w_acc);
+	write_float_h(buffer, &size, data->max_w_dec);
+
+	return size;
+}
+
+size_t write_robot_shoot_config_fixed(uint8_t* const buffer, const struct robot_shoot_config_msg_t* const data)
+{
+	memset(buffer, 0, MAX_PAYLOAD_SIZE);
+
+	size_t size = 0;
+
+	write_uint8(buffer, &size, MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_CONFIG_SHOOT));
 
 	write_v3f_h(buffer, &size, &data->direct_coeffs);
 	write_v3f_h(buffer, &size, &data->chip_coeffs);
@@ -215,7 +232,7 @@ size_t write_robot_config_fixed(uint8_t* const buffer, const struct robot_config
 
 size_t write_robot_matrix_fixed(uint8_t* const buffer, const struct robot_matrix_msg_t* const data)
 {
-	memset(buffer, 0, PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE);
 
 	size_t size = 0;
 
@@ -229,47 +246,65 @@ size_t write_robot_matrix_fixed(uint8_t* const buffer, const struct robot_matrix
 	return size;
 }
 
-size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feedback_msg_t* const data)
+size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feedback_msg_t* const data, enum feedback_type_e type)
 {
-	memset(buffer, 0, PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE);
 
 	size_t size = 0;
 
-	write_uint8(buffer, &size, MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_FEEDBACK));
-
-	write_float_h(buffer, &size, data->battery_voltage);
-	write_float_h(buffer, &size, data->capacitor_voltage);
-
-	write_float_h(buffer, &size, data->omega);
-	write_float_h(buffer, &size, data->orientation);
-
-	write_v4f_h(buffer, &size, &data->motor_velocity);
-	write_v4f_h(buffer, &size, &data->motor_target);
-
-	write_bits8(buffer, &size, &data->motor_fault);
-	write_bits8(buffer, &size, &data->button_status);
+	write_uint8(buffer, &size, MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_FEEDBACK_BASE + type));
 
 	const uint8_t packed_data =
-		data->fault                   |
-		data->ball_detected      << 1 |
-		data->booster_enabled    << 2 |
-		data->dribbler_connected << 3 ;
-
+		data->fault |
+		data->ball_detected << 1 |
+		data->booster_enabled << 2 |
+		data->dribbler_connected << 3;
 	write_uint8(buffer, &size, packed_data);
+
+	write_bits8(buffer, &size, &data->motor_fault);
+
+	if (type <= FEEDBACK_TYPE_INFO)
+	{
+		write_float_h(buffer, &size, data->battery_voltage);
+		write_float_h(buffer, &size, data->capacitor_voltage);
+
+		if (type <= FEEDBACK_TYPE_DEBUG)
+		{
+			write_float_h(buffer, &size, data->omega);
+			write_float_h(buffer, &size, data->orientation);
+
+			write_v4f_h(buffer, &size, &data->motor_velocity);
+			write_v4f_h(buffer, &size, &data->motor_target);
+
+			write_bits8(buffer, &size, &data->button_status);
+		}
+	}
 
 	return size;
 }
 
 size_t write_robot_feedback_custom_fixed(uint8_t* const buffer, const struct robot_feedback_custom_t* const data)
 {
-	memset(buffer, 0, PAYLOAD_SIZE);
+	memset(buffer, 0, MAX_PAYLOAD_SIZE);
 
 	size_t size = 0;
 
-	write_uint8(buffer, &size, MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_FEEDBACK_CUSTOM));
+	write_uint8(buffer, &size, MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_FEEDBACK_BASE + FEEDBACK_TYPE_CUSTOM));
 
 	write_uint8(buffer, &size, data->length);
 	write_bytes(buffer, &size, data->debug_dump, data->length);
+
+	return size;
+}
+
+size_t write_robot_wrapper_fixed(uint8_t* const buffer, const struct robot_wrapper_msg_t* const data)
+{
+	memset(buffer, 0, MAX_PAYLOAD_SIZE);
+
+	size_t size = 0;
+
+	write_uint8(buffer, &size, data->length);
+	write_bytes(buffer, &size, data->data, MAX_PAYLOAD_SIZE - 1);
 
 	return size;
 }
