@@ -2,7 +2,7 @@
 #define DEFINES_H
 
 #define MAX_PAYLOAD_SIZE 32
-#define MAX_ON_BOARD_SIZE 128
+#define MAX_ON_BOARD_SIZE 64
 
 #define PROTO_VERSION_FIXED    0x1
 #define PROTO_VERSION_VAR      0x2

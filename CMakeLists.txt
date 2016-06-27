@@ -30,4 +30,8 @@ add_executable(ImmortalsCom ${SOURCE_FILES})
 
 set_files_group(SOURCE_FILES)
 
+if(MSVC)
+  target_link_libraries(ImmortalsCom wsock32 ws2_32)
+endif()
+
 target_link_libraries(ImmortalsCom ${PROTOBUF_LIBRARIES})

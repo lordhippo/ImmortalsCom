@@ -111,6 +111,9 @@ void read_uint32(const uint8_t* const buffer, size_t* const pos, uint32_t* const
 	*pos += 4;
 }
 
+#ifdef __C3000__ 
+__noinline
+#endif 
 void read_float_h(const uint8_t* const buffer, size_t* const pos, union float_32_u_t* const data)
 {
 	uint16_t h_data;
@@ -266,7 +269,8 @@ uint8_t read_robot_on_board_config_fixed(const uint8_t* const buffer, const size
 		return inner_result;
 
 	read_float(buffer, &pos, &data->gyro_offset);
-	read_uint8(buffer, &pos, &data->nrf_channel);
+	read_uint8(buffer, &pos, &data->nrf_channel_rx);
+	read_uint8(buffer, &pos, &data->nrf_channel_tx);
 	read_uint8(buffer, &pos, &data->use_encoders);
 
 	return (pos == size ? PARSE_RESULT_SUCCESS : PARSE_RESULT_SIZE_MISMATCH);

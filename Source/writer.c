@@ -109,6 +109,9 @@ void write_uint32(uint8_t* const buffer, size_t* const pos, const uint32_t data)
 	*pos += 4;
 }
 
+#ifdef __C3000__ 
+__noinline 
+#endif 
 void write_float_h(uint8_t* const buffer, size_t* const pos, const union float_32_u_t data)
 {
 	write_uint16(buffer, pos, half_from_float(data.u32));
@@ -249,7 +252,8 @@ size_t write_robot_on_board_config_fixed(uint8_t* const buffer, const struct rob
 	size += inner_length;
 
 	write_float(buffer, &size, data->gyro_offset);
-	write_uint8(buffer, &size, data->nrf_channel);
+	write_uint8(buffer, &size, data->nrf_channel_rx);
+	write_uint8(buffer, &size, data->nrf_channel_tx);
 	write_uint8(buffer, &size, data->use_encoders);
 
 	return size;

@@ -1,10 +1,13 @@
 #include <stdio.h>
-#include "half.h"
 
 #include "data_lite.h"
 #include "writer.h"
 #include "reader.h"
 #include "defines.h"
+
+#include <thread>
+
+#include "utility/netraw.h"
 
 void test_command()
 {
@@ -142,7 +145,8 @@ void test_config_on_board()
 	data.shoot_config.chip_coeffs.z.f32 = 2500.0f;
 
 	data.gyro_offset.f32 = 0.512f;
-	data.nrf_channel = 110;
+	data.nrf_channel_rx = 110;
+	data.nrf_channel_tx = 80;
 	data.use_encoders = 0;
 
 	uint8_t buffer[MAX_ON_BOARD_SIZE];
@@ -177,7 +181,8 @@ void test_config_on_board()
 		printf("--%s : [ %.2f : %.2f ]\n", "chip_coeffs.z", data.shoot_config.chip_coeffs.z.f32, parsed_data.shoot_config.chip_coeffs.z.f32);
 
 		printf("--%s : [ %.2f : %.2f ]\n", "gyro_offset", data.gyro_offset.f32, parsed_data.gyro_offset.f32);
-		printf("--%s : [ %u : %u ]\n", "nrf_channel", data.nrf_channel, parsed_data.nrf_channel);
+		printf("--%s : [ %u : %u ]\n", "nrf_channel_rx", data.nrf_channel_rx, parsed_data.nrf_channel_rx);
+		printf("--%s : [ %u : %u ]\n", "nrf_channel_tx", data.nrf_channel_tx, parsed_data.nrf_channel_tx);
 		printf("--%s : [ %u : %u ]\n", "use_encoders", data.use_encoders, parsed_data.use_encoders);
 	}
 }
@@ -314,6 +319,97 @@ int main()
 	test_config_on_board();
 	test_matrix();
 	test_feedback();
+
+	auto send_func = [&]()
+	{
+		Net::UDP udp;
+		udp.open();
+
+		Net::Address dest_address;
+		dest_address.setHost("224.5.92.5", 60005);
+
+		while (true)
+		{
+			struct robot_command_msg_t command_msg;
+			command_msg.velocity.x.f32 = 0.0f;
+			command_msg.velocity.y.f32 = 40.0f;
+			command_msg.halt = true;
+			command_msg.omega.f32 = 200.0f;
+			command_msg.target_orientation.f32 = 0.0f;
+			command_msg.orientation.f32 = 0.0f;
+			command_msg.has_orientation = true;
+			command_msg.shoot_power.f32 = 0.0f;
+			command_msg.dribbler.f32 = 000.0f;
+			command_msg.servo.f32 = 0.0f;
+			command_msg.beep = 0;
+			command_msg.shoot_type = SHOOT_TYPE_DIRECT;
+			command_msg.feedback_request = FEEDBACK_TYPE_DEBUG;
+
+			struct robot_wrapper_msg_t wrapper_msg;
+			wrapper_msg.length = write_robot_command_fixed(wrapper_msg.data, &command_msg);
+
+			uint8_t payload[7 * (MAX_PAYLOAD_SIZE + 1)];
+			memset(payload, 0, 7 * (MAX_PAYLOAD_SIZE + 1));
+
+			for (uint8_t i = 0; i < 6; i++)
+			{
+				payload[i*(MAX_PAYLOAD_SIZE + 1)] = i + 1;
+				write_robot_wrapper_fixed(payload + (i*(MAX_PAYLOAD_SIZE + 1) + 1), &wrapper_msg);
+			}
+
+			payload[6 * (MAX_PAYLOAD_SIZE + 1)] = 25;
+			payload[6 * (MAX_PAYLOAD_SIZE + 1) + 1] = 110;
+			payload[6 * (MAX_PAYLOAD_SIZE + 1) + 2] = 80;
+
+			bool res = udp.send(payload, 7 * (MAX_PAYLOAD_SIZE + 1), dest_address);
+
+			//printf("sendto: %d\n", res);
+
+			Sleep(16);
+		}
+	};
+
+	auto rcv_func = [&]()
+	{
+		Net::UDP udp;
+		if (!udp.open(60006, false, false, true))
+		{
+			fprintf(stderr, "Unable to open UDP network port: %d\n", 60006);
+			fflush(stderr);
+			return(false);
+		}
+
+		Net::Address multiaddr, interf;
+		multiaddr.setHost("224.5.23.3", 60006);
+		
+		interf.setAny();
+
+		if (!udp.addMulticast(multiaddr, interf)) {
+			fprintf(stderr, "Unable to setup UDP multicast\n");
+			fflush(stderr);
+			return(false);
+		}
+
+		char *in_buffer = new char[65536];
+
+		while (true)
+		{
+			Net::Address src;
+			int r = 0;
+			r = udp.recv(in_buffer, 65536, src);
+			if (r > 0) {
+				fflush(stdout);
+				//decode packet:
+				printf("received %lu bytes from %s\n", r, "");
+			}
+		}
+	};
+
+	std::thread send_thread(send_func);
+	std::thread rcv_thread(rcv_func);
+
+	send_thread.join();
+	rcv_thread.join();
 
 	return 0;
 }
