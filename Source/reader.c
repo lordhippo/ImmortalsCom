@@ -237,6 +237,41 @@ uint8_t read_robot_shoot_config_fixed(const uint8_t* const buffer, const size_t 
 	return (pos == size ? PARSE_RESULT_SUCCESS : PARSE_RESULT_SIZE_MISMATCH);
 }
 
+uint8_t read_robot_on_board_config_fixed(const uint8_t* const buffer, const size_t size, struct robot_on_board_config_t* const data)
+{
+	size_t pos = 0;
+
+	uint8_t header;
+	read_uint8(buffer, &pos, &header);
+	if (header != MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_CONFIG_ON_BOARD))
+		return PARSE_RESULT_HEADER_CORRUPTED;
+
+	uint8_t inner_length;
+	uint8_t inner_result;
+
+	read_uint8(buffer, &pos, &inner_length);
+	if (pos + inner_length > size)
+		return PARSE_RESULT_SIZE_MISMATCH;
+	inner_result = read_robot_control_config_fixed(buffer + pos, inner_length, &data->control_config);
+	pos += inner_length;
+	if (inner_result != PARSE_RESULT_SUCCESS)
+		return inner_result;
+
+	read_uint8(buffer, &pos, &inner_length);
+	if (pos + inner_length > size)
+		return PARSE_RESULT_SIZE_MISMATCH;
+	inner_result = read_robot_shoot_config_fixed(buffer + pos, inner_length, &data->shoot_config);
+	pos += inner_length;
+	if (inner_result != PARSE_RESULT_SUCCESS)
+		return inner_result;
+
+	read_float(buffer, &pos, &data->gyro_offset);
+	read_uint8(buffer, &pos, &data->nrf_channel);
+	read_uint8(buffer, &pos, &data->use_encoders);
+
+	return (pos == size ? PARSE_RESULT_SUCCESS : PARSE_RESULT_SIZE_MISMATCH);
+}
+
 uint8_t read_robot_matrix_fixed(const uint8_t* const buffer, const size_t size, struct robot_matrix_msg_t* const data)
 {
 	size_t pos = 0;

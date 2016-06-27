@@ -117,6 +117,71 @@ void test_config_shoot()
 	}
 }
 
+void test_config_on_board()
+{
+	struct robot_on_board_config_t data;
+
+	data.control_config.motor_kp.f32 = 1.0f;
+	data.control_config.motor_ki.f32 = -2.0f;
+	data.control_config.motor_kd.f32 = 3.0f;
+	data.control_config.motor_i_limit.f32 = -4.0f;
+
+	data.control_config.gyro_kp.f32 = 11.0f;
+	data.control_config.gyro_ki.f32 = -22.0f;
+	data.control_config.gyro_kd.f32 = 36.0f;
+	data.control_config.gyro_i_limit.f32 = -14.012f;
+
+	data.control_config.max_w_acc.f32 = 336.10f;
+	data.control_config.max_w_dec.f32 = -154.03f;
+
+	data.shoot_config.direct_coeffs.x.f32 = 100.0f;
+	data.shoot_config.direct_coeffs.y.f32 = 150.0f;
+	data.shoot_config.direct_coeffs.z.f32 = 250.0f;
+	data.shoot_config.chip_coeffs.x.f32 = 1000.0f;
+	data.shoot_config.chip_coeffs.y.f32 = 1050.0f;
+	data.shoot_config.chip_coeffs.z.f32 = 2500.0f;
+
+	data.gyro_offset.f32 = 0.512f;
+	data.nrf_channel = 110;
+	data.use_encoders = 0;
+
+	uint8_t buffer[MAX_ON_BOARD_SIZE];
+	size_t length = write_robot_on_board_config_fixed(buffer, &data);
+
+	struct robot_on_board_config_t parsed_data;
+	uint8_t result = read_robot_on_board_config_fixed(buffer, length, &parsed_data);
+
+	printf("-Robot on-board config [%lu] : %s\n", length, result == PARSE_RESULT_SUCCESS ? "pass" : "fail");
+
+	if (result == PARSE_RESULT_SUCCESS)
+	{
+		printf("--%s : [ %.2f : %.2f ]\n", "motor kp", data.control_config.motor_kp.f32, parsed_data.control_config.motor_kp.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "motor ki", data.control_config.motor_ki.f32, parsed_data.control_config.motor_ki.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "motor kd", data.control_config.motor_kd.f32, parsed_data.control_config.motor_kd.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "motor i_limit", data.control_config.motor_i_limit.f32, parsed_data.control_config.motor_i_limit.f32);
+
+		printf("--%s : [ %.2f : %.2f ]\n", "gyro kp", data.control_config.gyro_kp.f32, parsed_data.control_config.gyro_kp.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "gyro ki", data.control_config.gyro_ki.f32, parsed_data.control_config.gyro_ki.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "gyro kd", data.control_config.gyro_kd.f32, parsed_data.control_config.gyro_kd.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "gyro i_limit", data.control_config.gyro_i_limit.f32, parsed_data.control_config.gyro_i_limit.f32);
+
+		printf("--%s : [ %.2f : %.2f ]\n", "max_w_acc", data.control_config.max_w_acc.f32, parsed_data.control_config.max_w_acc.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "max_w_dec", data.control_config.max_w_dec.f32, parsed_data.control_config.max_w_dec.f32);
+
+		printf("--%s : [ %.2f : %.2f ]\n", "direct_coeffs.x", data.shoot_config.direct_coeffs.x.f32, parsed_data.shoot_config.direct_coeffs.x.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "direct_coeffs.y", data.shoot_config.direct_coeffs.y.f32, parsed_data.shoot_config.direct_coeffs.y.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "direct_coeffs.z", data.shoot_config.direct_coeffs.z.f32, parsed_data.shoot_config.direct_coeffs.z.f32);
+
+		printf("--%s : [ %.2f : %.2f ]\n", "chip_coeffs.x", data.shoot_config.chip_coeffs.x.f32, parsed_data.shoot_config.chip_coeffs.x.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "chip_coeffs.y", data.shoot_config.chip_coeffs.y.f32, parsed_data.shoot_config.chip_coeffs.y.f32);
+		printf("--%s : [ %.2f : %.2f ]\n", "chip_coeffs.z", data.shoot_config.chip_coeffs.z.f32, parsed_data.shoot_config.chip_coeffs.z.f32);
+
+		printf("--%s : [ %.2f : %.2f ]\n", "gyro_offset", data.gyro_offset.f32, parsed_data.gyro_offset.f32);
+		printf("--%s : [ %u : %u ]\n", "nrf_channel", data.nrf_channel, parsed_data.nrf_channel);
+		printf("--%s : [ %u : %u ]\n", "use_encoders", data.use_encoders, parsed_data.use_encoders);
+	}
+}
+
 void test_matrix()
 {
 	struct robot_matrix_msg_t data;
@@ -246,6 +311,7 @@ int main()
 	test_command();
 	test_config_control();
 	test_config_shoot();
+	test_config_on_board();
 	test_matrix();
 	test_feedback();
 

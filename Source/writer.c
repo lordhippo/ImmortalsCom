@@ -230,6 +230,31 @@ size_t write_robot_shoot_config_fixed(uint8_t* const buffer, const struct robot_
 	return size;
 }
 
+size_t write_robot_on_board_config_fixed(uint8_t* const buffer, const struct robot_on_board_config_t* const data)
+{
+	memset(buffer, 0, MAX_ON_BOARD_SIZE);
+
+	size_t size = 0;
+
+	write_uint8(buffer, &size, MESSAGE_HEADER(PROTO_VERSION_FIXED, TYPE_CONFIG_ON_BOARD));
+
+	uint8_t inner_length;
+
+	inner_length = write_robot_control_config_fixed(buffer + size + 1, &data->control_config);
+	write_uint8(buffer, &size, inner_length);
+	size += inner_length;
+
+	inner_length = write_robot_shoot_config_fixed(buffer + size + 1, &data->shoot_config);
+	write_uint8(buffer, &size, inner_length);
+	size += inner_length;
+
+	write_float(buffer, &size, data->gyro_offset);
+	write_uint8(buffer, &size, data->nrf_channel);
+	write_uint8(buffer, &size, data->use_encoders);
+
+	return size;
+}
+
 size_t write_robot_matrix_fixed(uint8_t* const buffer, const struct robot_matrix_msg_t* const data)
 {
 	memset(buffer, 0, MAX_PAYLOAD_SIZE);
