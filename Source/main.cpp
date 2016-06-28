@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include <thread>
 
-#include "library/data_lite.h"
-#include "library/writer.h"
-#include "library/reader.h"
-#include "library/defines.h"
+#include "proto_bridge.h"
+#include "../protos/messages_immortals_robot_wrapper.pb.h"
 
 #include "utility/netraw.h"
 
@@ -27,42 +25,41 @@ int main()
 		Net::Address dest_address;
 		dest_address.setHost("224.5.92.5", 60005);
 
+		int robot_ids[6] = { 0, 1, 2, 3, 4, 5 };
+
+		Immortals::Data::RobotMessageFrame message_frame;
+		for (auto id : robot_ids)
+		{
+			auto message = message_frame.add_messages();
+			message->set_robot_id(id);
+
+			auto command = message->mutable_command();
+			
+			/*command->mutable_velocity()->set_x(0.0f);
+			command->mutable_velocity()->set_y(40.0f);*/
+			
+			command->set_omega(200.0f);
+			command->set_target_orientation(0.0f);
+			/*command->set_orientation(0.0f);*/
+			
+			command->set_chip(80.0f);
+			
+			command->set_dribbler(0.0f);
+			command->set_servo(0.0f);
+			command->set_beep(0.0f);
+			
+			command->set_feedback(Immortals::Data::RobotCommand_FeedbackRequestType_Debug);
+		}
+
 		while (true)
 		{
-			struct robot_command_msg_t command_msg;
-			command_msg.velocity.x.f32 = 0.0f;
-			command_msg.velocity.y.f32 = 40.0f;
-			command_msg.halt = true;
-			command_msg.omega.f32 = 200.0f;
-			command_msg.target_orientation.f32 = 0.0f;
-			command_msg.orientation.f32 = 0.0f;
-			command_msg.has_orientation = true;
-			command_msg.shoot_power.f32 = 0.0f;
-			command_msg.dribbler.f32 = 000.0f;
-			command_msg.servo.f32 = 0.0f;
-			command_msg.beep = 0;
-			command_msg.shoot_type = SHOOT_TYPE_DIRECT;
-			command_msg.feedback_request = FEEDBACK_TYPE_DEBUG;
-
-			struct robot_wrapper_msg_t wrapper_msg;
-			wrapper_msg.length = write_robot_command_fixed(wrapper_msg.data, &command_msg);
-
 			uint8_t payload[7 * (MAX_PAYLOAD_SIZE + 1)];
-			memset(payload, 0, 7 * (MAX_PAYLOAD_SIZE + 1));
 
-			for (uint8_t i = 0; i < 6; i++)
-			{
-				payload[i*(MAX_PAYLOAD_SIZE + 1)] = i + 1;
-				write_robot_wrapper_fixed(payload + (i*(MAX_PAYLOAD_SIZE + 1) + 1), &wrapper_msg);
-			}
+			const size_t size = proto_msg_frame_to_byte_array(message_frame, payload);
 
-			payload[6 * (MAX_PAYLOAD_SIZE + 1)] = 25;
-			payload[6 * (MAX_PAYLOAD_SIZE + 1) + 1] = 110;
-			payload[6 * (MAX_PAYLOAD_SIZE + 1) + 2] = 80;
+			bool res = udp.send(payload, size, dest_address);
 
-			bool res = udp.send(payload, 7 * (MAX_PAYLOAD_SIZE + 1), dest_address);
-
-			//printf("sendto: %d\n", res);
+			printf("sendto (%lu): %d\n", size, res);
 
 			Sleep(16);
 		}
@@ -89,7 +86,7 @@ int main()
 			return(false);
 		}
 
-		char *in_buffer = new char[65536];
+		uint8_t *in_buffer = new uint8_t[65536];
 
 		while (true)
 		{
@@ -100,6 +97,24 @@ int main()
 				fflush(stdout);
 				//decode packet:
 				printf("received %lu bytes from %s\n", r, "");
+
+				Immortals::Data::RobotFeedback feedback;
+				feedback_bytes_to_proto_feedback(in_buffer, r, &feedback);
+
+				//feedback.PrintDebugString();
+
+				/*printf("motors : (%7.2f, %7.2f, %7.2f, %7.2f)\n",
+					feedback.motor_velocity().x(),
+					feedback.motor_velocity().y(),
+					feedback.motor_velocity().z(),
+					feedback.motor_velocity().w());*/
+
+				/*printf("ir : %d\n",
+					feedback.ball_detected());*/
+
+				printf("omega : %7.2f\n",
+					feedback.omega());
+				
 			}
 		}
 	};
