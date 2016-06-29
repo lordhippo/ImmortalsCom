@@ -25,30 +25,59 @@ int main()
 		Net::Address dest_address;
 		dest_address.setHost("224.5.92.5", 60005);
 
-		int robot_ids[6] = { 0, 1, 2, 3, 4, 5 };
+		int robot_ids[1] = { 0 };
 
 		Immortals::Data::RobotMessageFrame message_frame;
-		for (auto id : robot_ids)
-		{
-			auto message = message_frame.add_messages();
-			message->set_robot_id(id);
 
-			auto command = message->mutable_command();
-			
-			/*command->mutable_velocity()->set_x(0.0f);
-			command->mutable_velocity()->set_y(40.0f);*/
-			
-			command->set_omega(200.0f);
-			command->set_target_orientation(0.0f);
-			/*command->set_orientation(0.0f);*/
-			
-			command->set_chip(80.0f);
-			
-			command->set_dribbler(0.0f);
-			command->set_servo(0.0f);
-			command->set_beep(0.0f);
-			
-			command->set_feedback(Immortals::Data::RobotCommand_FeedbackRequestType_Debug);
+		int mode = 0;
+
+		if (mode == 0)
+		{
+			for (auto id : robot_ids)
+			{
+				auto message = message_frame.add_messages();
+				message->set_robot_id(id);
+
+				auto command = message->mutable_command();
+
+				command->mutable_velocity()->set_x(-10.0f);
+				command->mutable_velocity()->set_y(1.0f);
+
+				command->set_omega(200.0f);
+				command->set_target_orientation(0.0f);
+				command->set_orientation(0.0f);
+
+				command->set_chip(0.0f);
+
+				command->set_dribbler(0.0f);
+				command->set_servo(0.0f);
+				command->set_beep(0.0f);
+
+				command->set_feedback(Immortals::Data::RobotCommand_FeedbackRequestType_Debug);
+			}
+		}
+		else if (mode == 1)
+		{
+			for (auto id : robot_ids)
+			{
+				auto message = message_frame.add_messages();
+				message->set_robot_id(id);
+
+				auto config = message->mutable_control_config();
+				config->set_motor_kp(15.0f);
+				config->set_motor_ki(1.0f);
+				config->set_motor_kd(-20.0f);
+				config->set_motor_i_limit(1000.0f);
+
+				config->set_gyro_kp(5.0f);
+				config->set_gyro_ki(0.0f);
+				config->set_gyro_kd(0.5f);
+				config->set_gyro_i_limit(0.0f);
+
+				config->set_max_w_acc(1.0f);
+				config->set_max_w_dec(1.0f);
+
+			}
 		}
 
 		while (true)
@@ -57,7 +86,12 @@ int main()
 
 			const size_t size = proto_msg_frame_to_byte_array(message_frame, payload);
 
-			bool res = udp.send(payload, size, dest_address);
+			memset(payload + size, 0, MAX_PAYLOAD_SIZE + 1);
+			payload[size] = 25;
+			payload[size + 1] = 110;
+			payload[size + 2] = 80;
+
+			bool res = udp.send(payload, size + MAX_PAYLOAD_SIZE + 1, dest_address);
 
 			printf("sendto (%lu): %d\n", size, res);
 
@@ -105,18 +139,25 @@ int main()
 
 				//feedback.PrintDebugString();
 
-				/*printf("motors : (%7.2f, %7.2f, %7.2f, %7.2f)\n",
+				printf("targets : (%7.2f, %7.2f, %7.2f, %7.2f)\n",
+					feedback.motor_target().x(),
+					feedback.motor_target().y(),
+					feedback.motor_target().z(),
+					feedback.motor_target().w());
+
+				printf("motors : (%7.2f, %7.2f, %7.2f, %7.2f)\n",
 					feedback.motor_velocity().x(),
 					feedback.motor_velocity().y(),
 					feedback.motor_velocity().z(),
-					feedback.motor_velocity().w());*/
+					feedback.motor_velocity().w());
 
-				/*printf("ir : %d\n",
-					feedback.ball_detected());*/
-
-				printf("omega (%d) : %7.2f\n",
+				/*printf("ir  (%d) : %d\n",
 					message.robot_id(),
-					feedback.omega());
+					feedback.booster_enabled());*/
+
+				/*printf("omega (%d) : %7.2f\n",
+					message.robot_id(),
+					feedback.omega());*/
 				
 			}
 		}
