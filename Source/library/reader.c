@@ -313,6 +313,7 @@ uint8_t read_robot_feedback_fixed(const uint8_t* const buffer, const size_t size
 	data->ball_detected = (packed_data >> 1) & 0x01;
 	data->booster_enabled = (packed_data >> 2) & 0x01;
 	data->dribbler_connected = (packed_data >> 3) & 0x01;
+	data->robot_id = (packed_data >> 4) & 0x0F;
 
 	read_bits8(buffer, &pos, &data->motor_fault);
 

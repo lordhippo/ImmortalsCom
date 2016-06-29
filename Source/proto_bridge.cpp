@@ -127,7 +127,7 @@ size_t proto_msg_frame_to_byte_array(const Immortals::Data::RobotMessageFrame &d
 	return size;
 }
 
-bool feedback_bytes_to_proto_feedback(const uint8_t *const buffer, const size_t size, Immortals::Data::RobotFeedback *const proto_msg)
+bool feedback_bytes_to_proto_feedback(const uint8_t *const buffer, const size_t size, Immortals::Data::RobotMessage *const proto_msg)
 {
 	uint8_t result;
 
@@ -141,47 +141,51 @@ bool feedback_bytes_to_proto_feedback(const uint8_t *const buffer, const size_t 
 	if (result != PARSE_RESULT_SUCCESS)
 		return false;
 
-	proto_msg->Clear();
-
-	proto_msg->set_battery_voltage(message.battery_voltage.f32);
-	proto_msg->set_capacitor_voltage(message.capacitor_voltage.f32);
+	proto_msg->set_robot_id(message.robot_id);
 	
-	proto_msg->set_omega(message.omega.f32);
-	proto_msg->set_orientation(message.orientation.f32);
+	auto feedback = proto_msg->mutable_feedback();
 
-	proto_msg->mutable_motor_velocity()->set_x(message.motor_velocity.x.f32);
-	proto_msg->mutable_motor_velocity()->set_y(message.motor_velocity.y.f32);
-	proto_msg->mutable_motor_velocity()->set_z(message.motor_velocity.z.f32);
-	proto_msg->mutable_motor_velocity()->set_w(message.motor_velocity.w.f32);
+	feedback->Clear();
 
-	proto_msg->mutable_motor_target()->set_x(message.motor_target.x.f32);
-	proto_msg->mutable_motor_target()->set_y(message.motor_target.y.f32);
-	proto_msg->mutable_motor_target()->set_z(message.motor_target.z.f32);
-	proto_msg->mutable_motor_target()->set_w(message.motor_target.w.f32);
+	feedback->set_battery_voltage(message.battery_voltage.f32);
+	feedback->set_capacitor_voltage(message.capacitor_voltage.f32);
+	
+	feedback->set_omega(message.omega.f32);
+	feedback->set_orientation(message.orientation.f32);
 
-	proto_msg->add_motor_fault(message.motor_fault.bit0);
-	proto_msg->add_motor_fault(message.motor_fault.bit1);
-	proto_msg->add_motor_fault(message.motor_fault.bit2);
-	proto_msg->add_motor_fault(message.motor_fault.bit3);
+	feedback->mutable_motor_velocity()->set_x(message.motor_velocity.x.f32);
+	feedback->mutable_motor_velocity()->set_y(message.motor_velocity.y.f32);
+	feedback->mutable_motor_velocity()->set_z(message.motor_velocity.z.f32);
+	feedback->mutable_motor_velocity()->set_w(message.motor_velocity.w.f32);
 
-	proto_msg->add_encoder_fault(message.motor_fault.bit4);
-	proto_msg->add_encoder_fault(message.motor_fault.bit5);
-	proto_msg->add_encoder_fault(message.motor_fault.bit6);
-	proto_msg->add_encoder_fault(message.motor_fault.bit7);
+	feedback->mutable_motor_target()->set_x(message.motor_target.x.f32);
+	feedback->mutable_motor_target()->set_y(message.motor_target.y.f32);
+	feedback->mutable_motor_target()->set_z(message.motor_target.z.f32);
+	feedback->mutable_motor_target()->set_w(message.motor_target.w.f32);
 
-	proto_msg->add_button_status(message.button_status.bit0);
-	proto_msg->add_button_status(message.button_status.bit1);
-	proto_msg->add_button_status(message.button_status.bit2);
-	proto_msg->add_button_status(message.button_status.bit3);
-	proto_msg->add_button_status(message.button_status.bit4);
-	proto_msg->add_button_status(message.button_status.bit5);
-	proto_msg->add_button_status(message.button_status.bit6);
-	proto_msg->add_button_status(message.button_status.bit7);
+	feedback->add_motor_fault(message.motor_fault.bit0);
+	feedback->add_motor_fault(message.motor_fault.bit1);
+	feedback->add_motor_fault(message.motor_fault.bit2);
+	feedback->add_motor_fault(message.motor_fault.bit3);
 
-	proto_msg->set_fault(message.fault);
-	proto_msg->set_ball_detected(message.ball_detected);
-	proto_msg->set_booster_enabled(message.booster_enabled);
-	proto_msg->set_dribbler_connected(message.dribbler_connected);
+	feedback->add_encoder_fault(message.motor_fault.bit4);
+	feedback->add_encoder_fault(message.motor_fault.bit5);
+	feedback->add_encoder_fault(message.motor_fault.bit6);
+	feedback->add_encoder_fault(message.motor_fault.bit7);
+
+	feedback->add_button_status(message.button_status.bit0);
+	feedback->add_button_status(message.button_status.bit1);
+	feedback->add_button_status(message.button_status.bit2);
+	feedback->add_button_status(message.button_status.bit3);
+	feedback->add_button_status(message.button_status.bit4);
+	feedback->add_button_status(message.button_status.bit5);
+	feedback->add_button_status(message.button_status.bit6);
+	feedback->add_button_status(message.button_status.bit7);
+
+	feedback->set_fault(message.fault);
+	feedback->set_ball_detected(message.ball_detected);
+	feedback->set_booster_enabled(message.booster_enabled);
+	feedback->set_dribbler_connected(message.dribbler_connected);
 
 	return true;
 }

@@ -287,7 +287,8 @@ size_t write_robot_feedback_fixed(uint8_t* const buffer, const struct robot_feed
 		data->fault |
 		data->ball_detected << 1 |
 		data->booster_enabled << 2 |
-		data->dribbler_connected << 3;
+		data->dribbler_connected << 3 |
+		data->robot_id << 4;
 	write_uint8(buffer, &size, packed_data);
 
 	write_bits8(buffer, &size, &data->motor_fault);

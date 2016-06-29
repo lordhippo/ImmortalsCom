@@ -98,8 +98,10 @@ int main()
 				//decode packet:
 				printf("received %lu bytes from %s\n", r, "");
 
-				Immortals::Data::RobotFeedback feedback;
-				feedback_bytes_to_proto_feedback(in_buffer, r, &feedback);
+				Immortals::Data::RobotMessage message;
+				feedback_bytes_to_proto_feedback(in_buffer, r, &message);
+
+				const auto &feedback = message.feedback();
 
 				//feedback.PrintDebugString();
 
@@ -112,7 +114,8 @@ int main()
 				/*printf("ir : %d\n",
 					feedback.ball_detected());*/
 
-				printf("omega : %7.2f\n",
+				printf("omega (%d) : %7.2f\n",
+					message.robot_id(),
 					feedback.omega());
 				
 			}
