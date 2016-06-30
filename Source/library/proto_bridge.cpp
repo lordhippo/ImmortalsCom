@@ -1,9 +1,9 @@
 #include "proto_bridge.h"
 
-#include "../protos/messages_immortals_robot_wrapper.pb.h"
-#include "library/data_lite.h"
-#include "library/writer.h"
-#include "library/reader.h"
+#include "../../protos/messages_immortals_robot_wrapper.pb.h"
+#include "data_lite.h"
+#include "writer.h"
+#include "reader.h"
 
 size_t proto_msg_frame_to_byte_array(const Immortals::Data::RobotMessageFrame &data, uint8_t *const buffer)
 {

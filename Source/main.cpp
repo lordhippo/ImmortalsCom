@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <thread>
 
-#include "proto_bridge.h"
+#include "library/proto_bridge.h"
 #include "../protos/messages_immortals_robot_wrapper.pb.h"
 
 #include "utility/netraw.h"
@@ -25,11 +25,11 @@ int main()
 		Net::Address dest_address;
 		dest_address.setHost("224.5.92.5", 60005);
 
-		int robot_ids[1] = { 0 };
+		int robot_ids[2] = { 1, 5 };
 
 		Immortals::Data::RobotMessageFrame message_frame;
 
-		int mode = 0;
+		int mode = 1;
 
 		if (mode == 0)
 		{
@@ -40,12 +40,12 @@ int main()
 
 				auto command = message->mutable_command();
 
-				command->mutable_velocity()->set_x(-10.0f);
-				command->mutable_velocity()->set_y(1.0f);
+				command->mutable_velocity()->set_x(0.0f);
+				command->mutable_velocity()->set_y(0.0f);
 
 				command->set_omega(200.0f);
 				command->set_target_orientation(0.0f);
-				command->set_orientation(0.0f);
+				/*command->set_orientation(0.0f);*/
 
 				command->set_chip(0.0f);
 
@@ -65,16 +65,16 @@ int main()
 
 				auto config = message->mutable_control_config();
 				config->set_motor_kp(15.0f);
-				config->set_motor_ki(1.0f);
-				config->set_motor_kd(-20.0f);
-				config->set_motor_i_limit(1000.0f);
+				config->set_motor_ki(1.5f);
+				config->set_motor_kd(-15.0f);
+				config->set_motor_i_limit(750.0f);
 
 				config->set_gyro_kp(5.0f);
-				config->set_gyro_ki(0.0f);
-				config->set_gyro_kd(0.5f);
-				config->set_gyro_i_limit(0.0f);
+				config->set_gyro_ki(0.23f);
+				config->set_gyro_kd(0.296f);
+				config->set_gyro_i_limit(16.0f);
 
-				config->set_max_w_acc(1.0f);
+				config->set_max_w_acc(0.75f);
 				config->set_max_w_dec(1.0f);
 
 			}
@@ -102,7 +102,7 @@ int main()
 	auto rcv_func = [&]()
 	{
 		Net::UDP udp;
-		if (!udp.open(60006, false, false, true))
+		if (!udp.open(60006, true, false, true))
 		{
 			fprintf(stderr, "Unable to open UDP network port: %d\n", 60006);
 			fflush(stderr);
@@ -139,7 +139,7 @@ int main()
 
 				//feedback.PrintDebugString();
 
-				printf("targets : (%7.2f, %7.2f, %7.2f, %7.2f)\n",
+				/*printf("targets : (%7.2f, %7.2f, %7.2f, %7.2f)\n",
 					feedback.motor_target().x(),
 					feedback.motor_target().y(),
 					feedback.motor_target().z(),
@@ -149,11 +149,11 @@ int main()
 					feedback.motor_velocity().x(),
 					feedback.motor_velocity().y(),
 					feedback.motor_velocity().z(),
-					feedback.motor_velocity().w());
+					feedback.motor_velocity().w());*/
 
-				/*printf("ir  (%d) : %d\n",
+				printf("fault  (%d) : %d\n",
 					message.robot_id(),
-					feedback.booster_enabled());*/
+					feedback.fault());
 
 				/*printf("omega (%d) : %7.2f\n",
 					message.robot_id(),
